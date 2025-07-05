@@ -9,7 +9,10 @@ use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(AssetPlugin {
+            watch_for_changes_override: Some(true),
+            ..Default::default()
+        }))
         .add_plugins(EguiPlugin {
             enable_multipass_for_primary_context: true,
         })
@@ -91,7 +94,13 @@ fn shader_on_rim(
         next_state.set(ShaderState::Done);
     }
     for (entity, q) in gltf_query {
-        let mut entity_commands = commands.get_entity(entity).unwrap();
-        entity_commands.insert(MeshMaterial3d(materials.add(BlackHoleRimMaterial {})));
+        if q.0 == "BlackHole Rim" {
+            let black_hole_material = BlackHoleRimMaterial {};
+            let black_hole_material = materials.add(black_hole_material);
+            let mut entity_commands = commands.get_entity(entity).unwrap();
+            entity_commands.insert(MeshMaterial3d(black_hole_material));
+        } else {
+            info!("{}", q.0);
+        }
     }
 }
